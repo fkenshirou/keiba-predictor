@@ -1,0 +1,63 @@
+name: Build prototype dataset
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/prototype-dataset
+    paths:
+      - "scripts/build_prototype_dataset.py"
+      - ".github/workflows/build-prototype-dataset.yml"
+      - "csv/**"
+      - "report/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas pyarrow beautifulsoup4
+
+      - name: Build normalized prototype datasets
+        run: |
+          python scripts/build_prototype_dataset.py \
+            --repo-root . \
+            --output derived/prototype \
+            | tee derived_manifest.log
+
+      - name: Show manifest
+        run: |
+          cat derived/prototype/manifest.json
+          echo "## Prototype dataset manifest" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat derived/prototype/manifest.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload prototype dataset
+        uses: actions/upload-artifact@v4
+        with:
+          name: keiba-prototype-dataset
+          path: |
+            derived/prototype/*.parquet
+            derived/prototype/*.csv
+            derived/prototype/manifest.json
+            derived_manifest.log
+          if-no-files-found: error
+          retention-days: 30
