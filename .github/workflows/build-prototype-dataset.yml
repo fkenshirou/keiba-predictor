@@ -17,9 +17,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
-      - name: Checkout only prototype-era source data
+      - name: Checkout compact prototype source data
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -27,8 +27,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /csv/*.csv
-            /report/PredResult*2024*.html
-            /report/PredResult*2025*.html
+            /report/PredResult0_2025y_raceDate_20250105_20250105.html
+            /report/PredResult_2025y_raceDate_20250816_20250817.html
             /scripts/build_prototype_dataset.py
 
       - name: Set up Python
