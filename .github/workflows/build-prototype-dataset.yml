@@ -19,10 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Checkout
+      - name: Checkout only prototype-era source data
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /csv/*.csv
+            /report/PredResult*2024*.html
+            /report/PredResult*2025*.html
+            /scripts/build_prototype_dataset.py
 
       - name: Set up Python
         uses: actions/setup-python@v5
